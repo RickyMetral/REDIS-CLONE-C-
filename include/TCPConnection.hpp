@@ -34,10 +34,10 @@ public:
     void* get_in_addrs(struct sockaddr *sa);//Returns unknown sockaddr (IPV4 or IPV6)
     int32_t sendMsg(int socketfd, const void* message, size_t msglen);//Ensures to send all the bytes unless an error occurs.
     int32_t recvMsg(int socketfd, char* buffer, size_t buffersize);//Receives all the data sent. Returns number of bytes received. 
-    int32_t sendAll(int socketfd, const void* message, size_t msglen);//Ensures to send all the bytes unless an error occurs. Returns -1 on fail, 0 on success
-    int32_t recvAll(int socketfd, char* buffer, size_t buffersize);//Receives data until buffersize num bytes is read. Returns -1 on fail, 0 on success
-    int32_t writeAll(int socketfd, const void* message, size_t msglen);//Writes data until buffersize msglen num bytes is sent. Returns -1 on fail, 0 on success
-    int32_t readAll(int socketfd, char* buffer, size_t buffersize);//Receives data until buffersize num bytes is read. Returns -1 on fail, 0 on success
+    bool sendAll(int socketfd, const void* message, size_t msglen);//Ensures to send all the bytes unless an error occurs. Returns -1 on fail, 0 on success
+    bool recvAll(int socketfd, char* buffer, size_t buffersize);//Receives data until buffersize num bytes is read. Returns -1 on fail, 0 on success
+    bool writeAll(int socketfd, const void* message, size_t msglen);//Writes data until buffersize msglen num bytes is sent. Returns -1 on fail, 0 on success
+    bool readAll(int socketfd, char* buffer, size_t buffersize);//Receives data until buffersize num bytes is read. Returns -1 on fail, 0 on success
 };
 
 #endif

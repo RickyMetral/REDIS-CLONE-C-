@@ -98,7 +98,7 @@ int32_t TCPConnection::recvMsg(int socketfd, char* buffer, size_t buffersize){
     return recv(socketfd, buffer, buffersize, 0);
 }
 
-int32_t TCPConnection::sendAll(int sockfd, const void* msg, size_t msglen){
+bool TCPConnection::sendAll(int sockfd, const void* msg, size_t msglen){
     ssize_t total_sent = 0;
     ssize_t bytes_sent = 0;
     while(total_sent < msglen){
@@ -109,10 +109,10 @@ int32_t TCPConnection::sendAll(int sockfd, const void* msg, size_t msglen){
         }
         total_sent += bytes_sent;
     }
-    return bytes_sent == -1 ? -1: 0;//Return -1 on failure
+    return bytes_sent != 0 ? false: true;
 }
 
-int32_t TCPConnection::recvAll(int socketfd, char* buffer, size_t buffersize){
+bool TCPConnection::recvAll(int socketfd, char* buffer, size_t buffersize){
     ssize_t bytes_recv = 0;
     while(buffersize > 0){
         bytes_recv = recv(socketfd, buffer, buffersize, 0);
@@ -123,10 +123,10 @@ int32_t TCPConnection::recvAll(int socketfd, char* buffer, size_t buffersize){
         buffersize -= bytes_recv;
         buffer += bytes_recv;
     }
-    return buffersize != 0 ? -1 : 0;
+    return buffersize != 0 ? false: true;
 }
 
-int32_t TCPConnection::readAll(int socketfd, char *buffer, size_t buffersize){
+bool TCPConnection::readAll(int socketfd, char *buffer, size_t buffersize){
     ssize_t bytes_recv = 0;
     while(buffersize > 0){
         bytes_recv = read(socketfd, buffer, buffersize);
@@ -137,10 +137,10 @@ int32_t TCPConnection::readAll(int socketfd, char *buffer, size_t buffersize){
         buffersize -= bytes_recv;
         buffer += bytes_recv;
     }
-    return buffersize != 0 ? -1 : 0;
+    return buffersize != 0 ? false : true;
 }
 
-int32_t TCPConnection::writeAll(int socketfd, const void* message, size_t msglen){
+bool TCPConnection::writeAll(int socketfd, const void* message, size_t msglen){
     ssize_t total_sent = 0;
     ssize_t bytes_sent = 0;
     while(total_sent < msglen){
@@ -151,5 +151,5 @@ int32_t TCPConnection::writeAll(int socketfd, const void* message, size_t msglen
         }
         total_sent += bytes_sent;
     }
-    return bytes_sent == -1 ? -1: 0;//Return -1 on failure
+    return bytes_sent != 0 ? false : true;
 }

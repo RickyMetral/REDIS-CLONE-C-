@@ -32,11 +32,11 @@ int32_t TCPClient::sendMsg(const void* message, size_t msglen){
     return send(this->sockfd, message, msglen, 0);
 }
 
-int32_t TCPClient::sendAll(const void* msg, size_t msglen){
+bool TCPClient::sendAll(const void* msg, size_t msglen){
     return TCPConnection::sendAll(this->sockfd, msg, msglen);
 }
 
-int32_t TCPClient::recvAll(char* buffer, size_t buffersize){
+bool TCPClient::recvAll(char* buffer, size_t buffersize){
     ssize_t bytes_recv = 0;
     while(buffersize > 0){
         bytes_recv = recv(this->sockfd, buffer, buffersize, 0);
@@ -47,11 +47,11 @@ int32_t TCPClient::recvAll(char* buffer, size_t buffersize){
         buffersize -= bytes_recv;
         buffer += bytes_recv;
     }
-    return buffersize != 0 ? -1 : 0;
+    return buffersize != 0 ? false : true;
 }
 
 
-int32_t TCPClient::readAll(char *buffer, size_t buffersize){
+bool TCPClient::readAll(char *buffer, size_t buffersize){
     ssize_t bytes_recv = 0;
     while(buffersize > 0){
         bytes_recv = read(this->sockfd, buffer, buffersize);
@@ -62,10 +62,10 @@ int32_t TCPClient::readAll(char *buffer, size_t buffersize){
         buffersize -= bytes_recv;
         buffer += bytes_recv;
     }
-    return buffersize != 0 ? -1 : 0;
+    return buffersize != 0 ? false : true;
 }
 
-int32_t TCPClient::writeAll(const void* message, size_t msglen){
+bool TCPClient::writeAll(const void* message, size_t msglen){
     ssize_t total_sent = 0;
     ssize_t bytes_sent = 0;
     while(total_sent < msglen){
@@ -76,7 +76,7 @@ int32_t TCPClient::writeAll(const void* message, size_t msglen){
         }
         total_sent += bytes_sent;
     }
-    return bytes_sent == -1 ? -1: 0;//Return -1 on failure
+    return bytes_sent == -1 ? false : true;//Return -1 on failure
 }
 
 
