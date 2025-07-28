@@ -3,7 +3,7 @@
 
 
 
-TCPServer::TCPServer(const char* serverPort, int sock_family) : TCPConnection(sock_family, AI_PASSIVE){
+TCPServer::TCPServer(const char* serverPort, int sock_family, bool blocking) : TCPConnection(sock_family, AI_PASSIVE, blocking){
     struct sigaction sa;
     if(this->initSocket(NULL, "3490") == -1){
         perror("InitSocket)");
@@ -77,7 +77,7 @@ int32_t TCPServer::handleRequest(int socketfd){
         return err;
     } 
     if(len > MAX_MSGLEN){
-        std::cout << "Received Message len too long" << std::endl;
+        std::cerr << "Received Message len too long" << std::endl;
         return -1;
     }
     readbuf[len + 4 + 1] = '\0';//Null terminate message received

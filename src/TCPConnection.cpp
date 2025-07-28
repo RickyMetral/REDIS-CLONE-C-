@@ -2,8 +2,9 @@
 #include <stdio.h>
 
 
-TCPConnection::TCPConnection(int sock_family, int flags){
+TCPConnection::TCPConnection(size_t sock_family, size_t flags, bool blocking){
     this->sockfd = -1;
+    this->block = blocking;
 
     memset(&hints, 0, sizeof hints);//Zero out uninitialized vals
     this->hints.ai_family = sock_family;//IPV4 = AF_INET or IPV6 = AF_INET6
@@ -14,6 +15,7 @@ TCPConnection::TCPConnection(int sock_family, int flags){
 TCPConnection::~TCPConnection(){
     if(this->sockfd >= 0){
         close(this->sockfd);
+        std::cout << "Closed Socket" << std::endl;
     }
 }
 

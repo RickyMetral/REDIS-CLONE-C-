@@ -1,45 +1,59 @@
 #include "TCPServer.hpp"
 #include "Epoll.hpp"
 
-void epoll_callback(const struct epoll_event& event, TCPServer* conn){
-    conn->handleRequest(event.data.fd);
+void epoll_callback(const struct epoll_event& event, Epoll* epoll, TCPServer* conn){
+    if(event.data.fd == conn->getSock()) {
+        // New connection on server socket
+        sockaddr_storage their_addr;
+        char s[INET6_ADDRSTRLEN];
+        
+        int new_fd = conn->acceptConn((struct sockaddr*)&their_addr);
+        if(new_fd == -1) {
+            perror("accept");
+            return;
+        }
+        
+        inet_ntop(their_addr.ss_family,
+                    conn->get_in_addrs((struct sockaddr*)&their_addr),
+                    s, sizeof s);
+        printf("conn: got connection from %s\n", s);
+        
+        // Add new client to epoll
+        struct epoll_event client_event;
+        client_event.data.fd = new_fd;
+        client_event.events = EPOLLIN | EPOLLHUP;
+
+        if(!epoll->addfd(new_fd, client_event)){
+            std::cerr << "Could not add connection " << s << "to Epoll" << std::endl;
+            exit(1);
+        }
+        std::cout << "Added Connection " << s << " to Epoll" << std::endl;
+        
+
+    } else {
+        // Data from existing client
+        if(event.events & EPOLLIN) {
+            std::cout << "Handling Request From: " << event.data.fd << std::endl;
+            conn->handleRequest(event.data.fd);
+        }
+
+    }
 }
 
 int main(){
-    int new_fd;
-    sockaddr_storage their_addr;
-    char s[INET6_ADDRSTRLEN];
     vector<struct epoll_event> events;
+    struct epoll_event server_event;
 
-    TCPServer test("3490", AF_INET);
-    // test.queueConns();
+    TCPServer server("3490", AF_INET);
 
-    while(1) {  // main accept() loop
-        struct epoll_event event;
-        new_fd = test.acceptConn( (struct sockaddr *)&their_addr);
-        if (new_fd == -1) {
-            perror("accept");
-            continue;
-        }
+    server_event.data.fd = server.getSock();
+    server_event.events = EPOLLIN;
+    events.push_back(server_event);
 
-        inet_ntop(their_addr.ss_family,
-            test.get_in_addrs((struct sockaddr *)&their_addr),
-            s, sizeof s);
-        printf("server: got connection from %s\n", s);
-        
-        event.data.fd = new_fd;
-        event.events = EPOLLIN | EPOLLOUT;
+    Epoll epoll(events);
 
-        events.push_back(event);
-
-        inet_ntop(their_addr.ss_family,
-            test.get_in_addrs((struct sockaddr *)&their_addr),
-            s, sizeof s);
-        printf("server: got connection from %s\n", s);
-        Epoll epoll(events);
-        epoll.mainloop(epoll_callback, &test);
-        close(new_fd);  // parent doesn't need this
+    while(1){
+        epoll.mainloop(epoll_callback, &server);
     }
-
     return 0;
 }

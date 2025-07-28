@@ -10,7 +10,7 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-TCPClient::TCPClient(const char* ipaddr, const char* clientPort, int sock_family) : TCPConnection(sock_family, AF_UNSPEC){
+TCPClient::TCPClient(const char* ipaddr, const char* clientPort, int sock_family, bool blocking) : TCPConnection(sock_family, AF_UNSPEC, blocking){
     this->initSocket(ipaddr, clientPort);
 }
 
@@ -94,6 +94,7 @@ int32_t TCPClient::queryServer(const char* msg){
         perror("Write All");
         return err;
     }
+    std::cout << "Sent Message: " << msg << std::endl;
     char readbuf[4 + MAX_MSGLEN];
     //Read the ACK message header from server
     err = this->readAll(readbuf, 4);
