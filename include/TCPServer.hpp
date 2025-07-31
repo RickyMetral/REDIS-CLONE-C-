@@ -11,7 +11,7 @@ private:
     void sigchld_handler(int s);
 
 public:
-    TCPServer(const char* serverPort, int sock_family, bool blocking = true);//Sets sockfd to our server file descriptor. Unconnected when instantiated
+    TCPServer(const char* serverPort, int sock_family, bool block = true);//Sets sockfd to our server file descriptor. Unconnected when instantiated
     ~TCPServer() override;
     void queueConns();//Calls listen and queues any incoming connections, exits on fail
     int32_t acceptConn(struct sockaddr* clientaddr);//Accepts one connection from the connection queue, returns -1 on fail, does block I/O

@@ -1,4 +1,5 @@
 #include <cstring>
+#include <fcntl.h>
 #include <iostream>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -21,6 +22,7 @@ protected:
     int sockfd;
     addrinfo hints;
     bool block;
+    bool blocking;
 
 protected:
     void die(const char* msg);//Aborts the program and prints the errno messge
@@ -28,7 +30,8 @@ protected:
     virtual int establishEndpoint(int sockfd, struct addrinfo *p) = 0;//Virtual Function used when initializing socket (Server binds/ Client connects)
     static void sigChildHandler(int s);//Needs to be static for callback
     virtual ~TCPConnection();
-    TCPConnection(size_t sock_family, size_t flags, bool blocking = true);//Creates an unconnected TCP server. Call queueconnections + accept to create an initial connection
+    TCPConnection(size_t sock_family, size_t flags, bool block = true);//Creates an unconnected TCP server. Call queueconnections + accept to create an initial connection
+    void setNonblockFd(int socketfd); //Sets the passed fd to nonblock mode
 
 public:
     int getSock() const;

@@ -10,8 +10,11 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-TCPClient::TCPClient(const char* ipaddr, const char* clientPort, int sock_family, bool blocking) : TCPConnection(sock_family, AF_UNSPEC, blocking){
-    this->initSocket(ipaddr, clientPort);
+TCPClient::TCPClient(const char* clientPort, const char* ipaddr,int sock_family, bool block) : TCPConnection(sock_family, AF_UNSPEC, block){
+    if(this->initSocket(ipaddr, clientPort) <= -1){
+        std::cerr << "InitSocket Failed\n";
+        exit(1);
+    }
 }
 
 TCPClient::~TCPClient(){
@@ -37,46 +40,16 @@ bool TCPClient::sendAll(const void* msg, size_t msglen){
 }
 
 bool TCPClient::recvAll(char* buffer, size_t buffersize){
-    ssize_t bytes_recv = 0;
-    while(buffersize > 0){
-        bytes_recv = recv(this->sockfd, buffer, buffersize, 0);
-        if(bytes_recv < 0){
-            perror("RecvAll");
-            exit(1);
-        }
-        buffersize -= bytes_recv;
-        buffer += bytes_recv;
-    }
-    return buffersize != 0 ? false : true;
+    return TCPConnection::recvAll(this->sockfd, buffer, buffersize);
 }
 
 
 bool TCPClient::readAll(char *buffer, size_t buffersize){
-    ssize_t bytes_recv = 0;
-    while(buffersize > 0){
-        bytes_recv = read(this->sockfd, buffer, buffersize);
-        if(bytes_recv < 0){
-            perror("Read All failed");
-            return bytes_recv;
-        }
-        buffersize -= bytes_recv;
-        buffer += bytes_recv;
-    }
-    return buffersize != 0 ? false : true;
+    TCPConnection::readAll(this->sockfd, buffer, buffersize);
 }
 
 bool TCPClient::writeAll(const void* message, size_t msglen){
-    ssize_t total_sent = 0;
-    ssize_t bytes_sent = 0;
-    while(total_sent < msglen){
-        bytes_sent = send(this->sockfd, message + total_sent, msglen - total_sent, 0);
-        if(bytes_sent <= -1){
-            perror("writeall failed");
-            return bytes_sent;
-        }
-        total_sent += bytes_sent;
-    }
-    return bytes_sent == -1 ? false : true;//Return -1 on failure
+    TCPConnection::writeAll(this->sockfd, message, msglen);
 }
 
 

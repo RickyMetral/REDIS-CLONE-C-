@@ -2,11 +2,10 @@
 #include "TCPServer.hpp"
 
 
-
-TCPServer::TCPServer(const char* serverPort, int sock_family, bool blocking) : TCPConnection(sock_family, AI_PASSIVE, blocking){
+TCPServer::TCPServer(const char* serverPort, int sock_family, bool block) : TCPConnection(sock_family, AI_PASSIVE, block){
     struct sigaction sa;
-    if(this->initSocket(NULL, "3490") == -1){
-        perror("InitSocket)");
+    if(this->initSocket(NULL, serverPort) <= -1){
+        std::cerr << "InitSocket Failed\n";
         exit(1);
     }
     this->queueConns();
@@ -47,7 +46,7 @@ int32_t TCPServer::establishEndpoint(int socketfd, struct addrinfo *p){
 }
 
 void TCPServer::queueConns(){
-    if (listen(this->sockfd, BACKLOG) == -1) {
+    if (listen(this->sockfd, BACKLOG) == -1){
         perror("listen");
         exit(1);
     }

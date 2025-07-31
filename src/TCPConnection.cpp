@@ -2,9 +2,9 @@
 #include <stdio.h>
 
 
-TCPConnection::TCPConnection(size_t sock_family, size_t flags, bool blocking){
+TCPConnection::TCPConnection(size_t sock_family, size_t flags, bool block){
     this->sockfd = -1;
-    this->block = blocking;
+    this->blocking = block;
 
     memset(&hints, 0, sizeof hints);//Zero out uninitialized vals
     this->hints.ai_family = sock_family;//IPV4 = AF_INET or IPV6 = AF_INET6
@@ -19,12 +19,9 @@ TCPConnection::~TCPConnection(){
     }
 }
 
-void TCPConnection::die(const char *msg){
-    int err = errno;
-    fprintf(stderr, "[%d] %s\n", err, msg);
-    abort();
+void TCPConnection::setNonblockFd(int32_t socketfd){
+    fcntl(socketfd, F_SETFL, fcntl(socketfd, F_GETFL, 0) | O_NONBLOCK);
 }
-
 void TCPConnection::sigChildHandler(int s)
 {
     (void)s; // quiet unused variable warning
@@ -71,11 +68,14 @@ int TCPConnection::initSocket(const char* ipaddr, const char* port){
     freeaddrinfo(serverinfo);//Free the linked list, we don't need it anymore
 
     if(p == NULL){
-        fprintf(stderr, "Falied to establish endpoint\n");
+        std::cerr << "Falied to establish endpoint\n";
         exit(-1);
     }
+    if(this->blocking){
+        setNonblockFd(this->sockfd);
+    }
 
-    return sockfd;
+    return this->sockfd;
 }
 
 int TCPConnection::getSock() const{

@@ -44,8 +44,29 @@ Epoll::Epoll(struct epoll_event event_arr[], int32_t& num_events){
 }
 
 Epoll::~Epoll(){
+    printf("Closing Epoll fd");
     if(close(this->epoll_fd)){
         fprintf(stderr, "Failed to close epoll file descriptor\n");
         exit(1);
     }
+}
+
+bool Epoll::addfd(int32_t fd, struct epoll_event event){
+    if(epoll_ctl(this->epoll_fd, EPOLL_CTL_ADD, fd, &event) == -1){
+        perror("addfd->epoll_ctl failed");
+        return false;
+    }
+    return true;
+}
+
+bool Epoll::removefd(int32_t fd){
+    if(epoll_ctl(this->epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1){
+        perror("removefd->epoll_ctl failed");
+        return false;
+    }
+    return true;
+}
+
+int32_t Epoll::getEpollfd(){
+    return this->epoll_fd;
 }
