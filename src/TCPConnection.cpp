@@ -43,7 +43,7 @@ int TCPConnection::initSocket(const char* ipaddr, const char* port){
     int status = getaddrinfo(ipaddr, port, &this->hints, &serverinfo);
 
     if(status != 0){
-        fprintf(stderr, "gai error: %s\n", gai_strerror(status));
+        std::cerr << "gai error: " <<  gai_strerror(status) << std::endl;
         exit(1);
     }
 
@@ -55,7 +55,8 @@ int TCPConnection::initSocket(const char* ipaddr, const char* port){
             continue;
         }
         if(setsockopt(this->sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1){
-            this->die("setsockopt");
+            perror("setsockopt");
+            exit(1);
         }
         if(this->establishEndpoint(this->sockfd, p) == -1){
             close(this->sockfd);

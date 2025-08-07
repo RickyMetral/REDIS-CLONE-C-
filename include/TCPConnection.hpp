@@ -15,7 +15,6 @@
 #define TCPSERVERCONNECTION_H
 
 #define MAX_MSGLEN 4096
-//TODO maybe add a delete function
 
 class TCPConnection{
 protected:
@@ -25,7 +24,6 @@ protected:
     bool blocking;
 
 protected:
-    void die(const char* msg);//Aborts the program and prints the errno messge
     int initSocket(const char* ipaddr, const char* port);//Returns a file descriptor for a new socket
     virtual int establishEndpoint(int sockfd, struct addrinfo *p) = 0;//Virtual Function used when initializing socket (Server binds/ Client connects)
     static void sigChildHandler(int s);//Needs to be static for callback

@@ -10,6 +10,9 @@ TCPServer::TCPServer(const char* serverPort, int sock_family, bool block) : TCPC
     }
     this->queueConns();
     this->reapDeadProcesses(sa);
+    if(!block){
+        this->setNonblockFd(this->sockfd);
+    }
     printf("server: waiting for connections...\n");
 }
 

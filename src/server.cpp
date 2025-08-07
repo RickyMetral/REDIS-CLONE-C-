@@ -2,8 +2,8 @@
 #include "Epoll.hpp"
 
 void epoll_callback(const struct epoll_event& event, Epoll* epoll, TCPServer* conn){
+    // New connection on server socket to accept
     if(event.data.fd == conn->getSock()) {
-        // New connection on server socket
         sockaddr_storage their_addr;
         char s[INET6_ADDRSTRLEN];
         
@@ -21,7 +21,7 @@ void epoll_callback(const struct epoll_event& event, Epoll* epoll, TCPServer* co
         // Add new client to epoll
         struct epoll_event client_event;
         client_event.data.fd = new_fd;
-        client_event.events = EPOLLIN | EPOLLHUP;
+        client_event.events = EPOLLIN | EPOLLHUP | EPOLLOUT;
 
         if(!epoll->addfd(new_fd, client_event)){
             std::cerr << "Could not add connection " << s << "to Epoll" << std::endl;
@@ -32,7 +32,7 @@ void epoll_callback(const struct epoll_event& event, Epoll* epoll, TCPServer* co
 
     } else {
         // Data from existing client
-        if(event.events & EPOLLIN) {
+        if(event.events & EPOLLIN && event.events & EPOLLOUT) {
             std::cout << "Handling Request From: " << event.data.fd << std::endl;
             conn->handleRequest(event.data.fd);
         }

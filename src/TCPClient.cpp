@@ -10,10 +10,13 @@ void *get_in_addr(struct sockaddr *sa)
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-TCPClient::TCPClient(const char* clientPort, const char* ipaddr,int sock_family, bool block) : TCPConnection(sock_family, AF_UNSPEC, block){
+TCPClient::TCPClient(const char* clientPort, const char* ipaddr,int sock_family, bool block) : TCPConnection(sock_family, 0, block){
     if(this->initSocket(ipaddr, clientPort) <= -1){
         std::cerr << "InitSocket Failed\n";
         exit(1);
+    }
+    if(!block){
+        this->setNonblockFd(this->sockfd);
     }
 }
 
@@ -45,11 +48,11 @@ bool TCPClient::recvAll(char* buffer, size_t buffersize){
 
 
 bool TCPClient::readAll(char *buffer, size_t buffersize){
-    TCPConnection::readAll(this->sockfd, buffer, buffersize);
+    return TCPConnection::readAll(this->sockfd, buffer, buffersize);
 }
 
 bool TCPClient::writeAll(const void* message, size_t msglen){
-    TCPConnection::writeAll(this->sockfd, message, msglen);
+    return TCPConnection::writeAll(this->sockfd, message, msglen);
 }
 
 
